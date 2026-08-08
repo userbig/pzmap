@@ -1,0 +1,12 @@
+# Local tile renders — served from object storage in production,
+# regenerated locally via extract/ + pzmap2dzi (see README).
+/render
+
+# Python
+__pycache__/
+*.pyc
+
+# Local/editor
+.DS_Store
+Thumbs.db
+*.local.*

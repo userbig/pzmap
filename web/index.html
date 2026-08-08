@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="config.js"></script>
+
+<title>PZ Map — Interactive Project Zomboid B42 Map</title>
+<meta name="description" content="Unofficial interactive map for Project Zomboid Build 42: isometric floors, points of interest, street names, spoiler-free mode and shareable markers.">
+<link rel="canonical" href="https://pzmap.net/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#101114">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PZ Map">
+<meta property="og:title" content="PZ Map — Interactive Project Zomboid B42 Map">
+<meta property="og:description" content="Unofficial interactive map for Project Zomboid Build 42: isometric floors, points of interest, street names, spoiler-free mode and shareable markers.">
+<meta property="og:url" content="https://pzmap.net/">
+<meta property="og:image" content="https://pzmap.net/web/og.png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PZ Map — Interactive Project Zomboid B42 Map">
+<meta name="twitter:description" content="Unofficial interactive map for Project Zomboid Build 42: isometric floors, points of interest, street names, spoiler-free mode and shareable markers.">
+<meta name="twitter:image" content="https://pzmap.net/web/og.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%233478F6' d='M16 2c-6.1 0-11 4.9-11 11 0 8.3 11 17 11 17s11-8.7 11-17c0-6.1-4.9-11-11-11z'/%3E%3Ccircle cx='16' cy='13' r='4.5' fill='%23fff'/%3E%3C/svg%3E">
+
+<!-- Self-hosted: no CDN requests (Leaflet + Inter are vendored under web/vendor/). -->
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     Hidden SVG glyph set (symbols): simple filled paths, 0 0 20 20
+     viewBox, no stroke. Used by chips, POI badges and UI buttons.
+     ============================================================ -->
+<svg style="display:none">
+  <symbol id="g-search" viewBox="0 0 20 20"><path d="M12.9 11.5h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></symbol>
+  <symbol id="g-police" viewBox="0 0 20 20"><path d="M10 1.5 3.5 4v4.6c0 4.3 2.8 8.3 6.5 9.9 3.7-1.6 6.5-5.6 6.5-9.9V4L10 1.5zm0 4.1 1.2 2.4 2.7.4-2 1.9.5 2.7L10 11.7 7.6 13l.5-2.7-2-1.9 2.7-.4L10 5.6z"/></symbol>
+  <symbol id="g-food" viewBox="0 0 20 20"><path d="M6.2 1.8v6.4c0 1 .7 1.9 1.6 2.1v7.9h1.6v-7.9c1-.2 1.6-1.1 1.6-2.1V1.8H9.7v5.5h-.8V1.8H7.5v5.5h-.8V1.8H6.2zm8.4 0c-1.3 0-2.3 1.9-2.3 4.3 0 1.9.6 3.4 1.5 4v8.1h1.6V1.8h-.8z"/></symbol>
+  <symbol id="g-med" viewBox="0 0 20 20"><path d="M8 2h4v6h6v4h-6v6H8v-6H2V8h6V2z"/></symbol>
+  <symbol id="g-cart" viewBox="0 0 20 20"><path d="M2 2h2.4l.7 3H18l-1.8 7H6.3L4.5 4.5 4.1 3H2V2zm5 12.5a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zm7.6 0a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/></symbol>
+  <symbol id="g-gun" viewBox="0 0 20 20"><path d="M2 7h16v3h-2.5l-.7 4.5h-3l.5-4.5H8.7c-.3 2-1.6 3.5-4 3.5H3v-2h1.7c1.4 0 2-.8 2.1-1.5H2V7z"/></symbol>
+  <symbol id="g-gas" viewBox="0 0 20 20"><path d="M4 2h7v16H4V2zm1.8 2v4h3.4V4H5.8zM14 5l2.9 2.9c.4.4.6.9.6 1.4V15a2 2 0 0 1-3.9.6V11h-1.2V9.4h1.2V6.6L12.4 5.4 14 5z"/></symbol>
+  <symbol id="g-book" viewBox="0 0 20 20"><path d="M3 3.5C4.4 2.6 6 2.4 7.4 2.9c1 .3 1.9.8 2.6 1.5.7-.7 1.6-1.2 2.6-1.5 1.4-.5 3-.3 4.4.6v12c-1.4-.9-3-1.1-4.4-.6-1 .3-1.9.8-2.6 1.5-.7-.7-1.6-1.2-2.6-1.5-1.4-.5-3-.3-4.4.6v-12z"/></symbol>
+  <symbol id="g-church" viewBox="0 0 20 20"><path d="M9.2 2h1.6v2h1.7v1.6h-1.7v2.1l4.7 3v7.3h-3.2v-4a2.3 2.3 0 0 0-4.6 0v4H4.5V10.7l4.7-3V5.6H7.5V4h1.7V2z"/></symbol>
+  <symbol id="g-tool" viewBox="0 0 20 20"><path d="M14.5 2a4 4 0 0 0-3.9 4.9L3 14.5A1.8 1.8 0 1 0 5.5 17l7.6-7.6A4 4 0 0 0 18 5.1l-2.4 2.4-2.1-.6-.6-2.1L15.3 2c-.3-.1-.5-.1-.8 0z"/></symbol>
+  <symbol id="g-layers" viewBox="0 0 20 20"><path d="M10 2 2 7l8 5 8-5-8-5zm-5.6 8L2 11.5l8 5 8-5L15.6 10 10 13.5 4.4 10z"/></symbol>
+  <symbol id="g-plus" viewBox="0 0 20 20"><path d="M9 3h2v6h6v2h-6v6H9v-6H3V9h6V3z"/></symbol>
+  <symbol id="g-minus" viewBox="0 0 20 20"><path d="M3 9h14v2H3z"/></symbol>
+  <symbol id="g-cube" viewBox="0 0 20 20"><path d="M10 2 3 5.5v9L10 18l7-3.5v-9L10 2zm0 2.2 4.6 2.3L10 8.8 5.4 6.5 10 4.2zM5 8.1l4.2 2.1v5.2L5 13.3V8.1zm10 0v5.2l-4.2 2.1v-5.2L15 8.1z"/></symbol>
+  <symbol id="g-moon" viewBox="0 0 20 20"><path d="M12.8 2.2A8 8 0 1 0 17.8 12 6.5 6.5 0 0 1 12.8 2.2z"/></symbol>
+  <symbol id="g-flag" viewBox="0 0 20 20"><path d="M4 2h1.8v16H4V2zm3 1h9.5l-2.3 3.8L16.5 11H7V3z"/></symbol>
+  <symbol id="g-chev" viewBox="0 0 20 20"><path d="M10 12.6 4.7 7.3l1.4-1.4L10 9.8l3.9-3.9 1.4 1.4L10 12.6z"/></symbol>
+  <symbol id="g-x" viewBox="0 0 20 20"><path d="m5.3 3.9 4.7 4.7 4.7-4.7 1.4 1.4L11.4 10l4.7 4.7-1.4 1.4L10 11.4l-4.7 4.7-1.4-1.4L8.6 10 3.9 5.3l1.4-1.4z"/></symbol>
+  <symbol id="g-pharmacy" viewBox="0 0 20 20"><path d="M5.5 3.5a4 4 0 0 1 5.66 0l5.34 5.34a4 4 0 1 1-5.66 5.66L5.5 9.16a4 4 0 0 1 0-5.66zm1.41 1.41a2 2 0 0 0 0 2.83l1.5 1.5 2.83-2.83-1.5-1.5a2 2 0 0 0-2.83 0z"/></symbol>
+  <symbol id="g-bank" viewBox="0 0 20 20"><path d="M10 2 2 6.5V8h16V6.5L10 2zM3 9v7H2v1h16v-1h-1V9h-2v7H9V9H7v7H5V9H3z"/></symbol>
+  <symbol id="g-bar" viewBox="0 0 20 20"><path d="M4 6h11v9a2.5 2.5 0 0 1-2.5 2.5h-6A2.5 2.5 0 0 1 4 15V6zm11 1h2a2 2 0 0 1 0 4h-2V7zM5.5 3a1.4 1.4 0 0 1 2.6-.7 1.4 1.4 0 0 1 2.6.9c0 1.1-1.3 1.8-2.6 2.8C6.8 5 5.5 4.3 5.5 3z"/></symbol>
+  <symbol id="g-clothing" viewBox="0 0 20 20"><path d="M7 2 3 4.5 4.5 7l1-.6V17a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V6.4l1 .6L17 4.5 13 2c-.5 1.3-1.7 2-3 2s-2.5-.7-3-2z"/></symbol>
+  <symbol id="g-fire" viewBox="0 0 20 20"><path d="M10 1.5c.4 2.4-.6 3.6-1.8 4.8C6.8 7.7 5.5 9 5.5 11.5a4.5 4.5 0 1 0 9 0c0-1.6-.7-2.6-1.5-3.4.2 1 .1 1.8-.5 2.4-.2-2-1.2-3-2.5-4C10.9 5.3 10.6 3.5 10 1.5z"/></symbol>
+  <symbol id="g-motel" viewBox="0 0 20 20"><path d="M2 6h5a2 2 0 0 1 2 2v1h7a2 2 0 0 1 2 2v5h-2v-2H4v2H2V6z"/></symbol>
+  <symbol id="g-prison" viewBox="0 0 20 20"><path d="M6 9V6a4 4 0 0 1 8 0v3h1v9H5V9h1zm2 0h4V6a2 2 0 0 0-4 0v3zm2 3a1.5 1.5 0 0 0-.6 2.9l-.4 2.1h2l-.4-2.1A1.5 1.5 0 0 0 10 12z"/></symbol>
+  <symbol id="g-school" viewBox="0 0 20 20"><path d="M10 3 1 7l9 4 7-3.1V12h1.4V7.4L10 3zM5 10.5V14c0 1.5 2.5 3 5 3s5-1.5 5-3v-3.5l-5 2.2-5-2.2z"/></symbol>
+  <symbol id="g-selfstorage" viewBox="0 0 20 20"><path d="M2 5.5 10 2l8 3.5-8 3.5-8-3.5zm0 2.3 7 3.1v7.1L2 14.9V7.8zm16 0v7.1l-7 3.1v-7.1l7-3.1z"/></symbol>
+  <symbol id="g-warehouse" viewBox="0 0 20 20"><path d="M2 17V9l4-2.3V9l4-2.3V9l4-2.3V9l3-1.7V5h1.5v3.5L20 9v8H2z"/></symbol>
+</svg>
+
+<div id="map"></div>
+
+<!-- ===== search (town/category) ===== -->
+<div class="search-card frost">
+  <div class="search-row">
+    <svg><use href="#g-search"/></svg>
+    <input id="search-input" type="text" data-i18n-placeholder="search.placeholder" placeholder="Town, category…" autocomplete="off">
+    <kbd id="search-kbd">/</kbd>
+    <button id="search-clear" class="clear-btn" data-i18n-title="search.clear" title="Clear"><svg><use href="#g-x"/></svg></button>
+  </div>
+  <div id="search-suggest" class="suggest frost hidden"></div>
+</div>
+
+<!-- ===== category chips ===== -->
+<div id="chips" class="chips"><!-- filled in by app.js --></div>
+
+<!-- ===== right stack ===== -->
+<div class="ctrl-stack">
+  <div class="ctrl-group frost">
+    <button id="zoom-in-btn" class="ctrl-btn lift" data-i18n-title="zoom.in" title="Zoom in"><svg><use href="#g-plus"/></svg></button>
+    <button id="zoom-out-btn" class="ctrl-btn lift" data-i18n-title="zoom.out" title="Zoom out"><svg><use href="#g-minus"/></svg></button>
+  </div>
+  <div class="ctrl-group frost">
+    <button id="mode-cube-btn" class="ctrl-btn lift" data-i18n-title="mode.title" title="Isometric / Scheme"><svg><use href="#g-cube"/></svg></button>
+    <button id="layers-btn" class="ctrl-btn lift" data-i18n-title="layers.title" title="Layers"><svg><use href="#g-layers"/></svg></button>
+    <button id="theme-btn" class="ctrl-btn lift" data-i18n-title="theme.title" title="Theme"><svg><use href="#g-moon"/></svg></button>
+  </div>
+  <div id="floor-selector" class="ctrl-group frost">
+    <button id="floor-up" class="ctrl-btn floor-btn lift" data-i18n-title="floor.up" title="Floor up">▲</button>
+    <div id="floor-value" class="floor-value">0</div>
+    <button id="floor-down" class="ctrl-btn floor-btn lift" data-i18n-title="floor.down" title="Floor down">▼</button>
+  </div>
+</div>
+
+<!-- ===== "Layers" dropdown panel ===== -->
+<div id="layers-panel" class="layers-panel frost hidden">
+  <div id="layer-row-outlines" class="layer-row">
+    <span data-i18n="layers.outlines">Building outlines</span>
+    <span class="switch"></span>
+  </div>
+  <div id="layer-row-basemap" class="layer-row">
+    <span data-i18n="layers.basemapCollage">Collage basemap (instead of our own render)</span>
+    <span class="switch"></span>
+  </div>
+  <div id="layer-row-streets" class="layer-row">
+    <span data-i18n="layers.streets">Street names</span>
+    <span class="switch"></span>
+  </div>
+  <div id="layer-row-allmarkers" class="layer-row">
+    <span data-i18n="layers.allmarkers">Markers on map</span>
+    <span class="switch"></span>
+  </div>
+  <div id="layer-row-spoilers" class="layer-row">
+    <span data-i18n="layers.spoilers">Spoilers</span>
+    <span class="switch"></span>
+  </div>
+  <div id="layer-row-compactchips" class="layer-row">
+    <span data-i18n="layers.compactchips">Chips without labels</span>
+    <span class="switch"></span>
+  </div>
+  <div id="layer-row-search" class="layer-row">
+    <span data-i18n="layers.search">Search</span>
+    <span class="switch"></span>
+  </div>
+  <div id="layer-row-chips" class="layer-row">
+    <span data-i18n="layers.chips">Category chips</span>
+    <span class="switch"></span>
+  </div>
+  <div class="layer-actions">
+    <button id="spoilers-showall" data-i18n="layers.showall">Show all</button>
+    <button id="spoilers-reset" data-i18n="layers.resetmarks">Reset marks</button>
+  </div>
+  <div class="layer-lang-row">
+    <button id="lang-uk-btn" class="lang-pill" data-i18n="lang.uk">Українська</button>
+    <button id="lang-en-btn" class="lang-pill" data-i18n="lang.en">English</button>
+  </div>
+  <div class="layer-about-row">
+    <div id="about-row" class="layer-row">
+      <span data-i18n="about.open">About this map</span>
+      <svg class="about-chev"><use href="#g-chev"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ===== "About" modal: overlay + centered glass card, see initAboutModal() in app.js ===== -->
+<div id="about-overlay" class="about-overlay hidden">
+  <div id="about-modal" class="about-modal frost" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <button id="about-close" class="about-close" type="button" data-i18n-title="about.close" title="Close" aria-label="Close"><svg><use href="#g-x"/></svg></button>
+    <h2 id="about-title" class="about-title">PZ Map</h2>
+    <p class="about-tagline" data-i18n="about.tagline">unofficial interactive map</p>
+    <p class="about-notice" data-i18n="about.notice">Unofficial fan project. Not affiliated with The Indie Stone.</p>
+    <ul class="about-links">
+      <li><a href="https://github.com/userbig/pzmap" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a></li>
+      <li class="about-made"><span data-i18n="about.madein">From Ukraine with Love</span> <svg class="ua-flag" viewBox="0 0 12 8" role="img" aria-label="Ukraine"><rect width="12" height="4" fill="#0057B7"/><rect y="4" width="12" height="4" fill="#FFD700"/></svg></li>
+    </ul>
+    <div class="about-section">
+      <h3 data-i18n="about.builtwith">Built with</h3>
+      <p>Leaflet 1.9.4 · Inter font · <span data-i18n="about.gamedata">game data © The Indie Stone</span></p>
+    </div>
+    <div class="about-section">
+      <h3 data-i18n="about.mapdata">Map data</h3>
+      <p id="about-build-line"></p>
+      <p id="about-date-line"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== status ===== -->
+<div id="status" class="status-pill frost"></div>
+<div id="iso-disclaimer" class="iso-disclaimer" data-i18n-title="iso.disclaimerTitle" title="Underlay is rendered from a different map revision; discrepancies are possible">⚠ <span data-i18n="iso.disclaimer">different map revision</span></div>
+<div id="compass" aria-hidden="true" data-i18n-title="compass.title" title="Compass directions in the current projection"></div>
+<div id="attribution" class="map-attribution">
+  <span data-i18n="attribution.unofficial">Unofficial</span> · <span data-i18n="attribution.notaffiliated">not affiliated with The Indie Stone</span> · <a href="https://github.com/userbig/pzmap" target="_blank" rel="noopener">GitHub</a> · <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> · <svg class="ua-flag" viewBox="0 0 12 8" role="img" aria-label="Ukraine"><rect width="12" height="4" fill="#0057B7"/><rect y="4" width="12" height="4" fill="#FFD700"/></svg>
+</div>
+
+<!-- ===== bottom markers pill ===== -->
+<button id="mk-pill" class="frost-dark lift">
+  <svg><use href="#g-flag"/></svg>
+  <span data-i18n="markers.pill">Markers</span> <span class="cnt">·</span> <span class="cnt" id="mk-count">0</span>
+  <svg class="chev"><use href="#g-chev"/></svg>
+</button>
+<div id="mk-panel" class="frost-dark hidden">
+  <div class="mk-head">
+    <h3 data-i18n="markers.title">My markers</h3>
+    <label class="mk-toggle" id="mk-vis"><span data-i18n="markers.show">Show</span> <span class="switch on"></span></label>
+  </div>
+  <div id="mk-list"><!-- filled in by app.js --></div>
+  <div class="mk-actions">
+    <button class="primary" id="mk-add">＋ <span data-i18n="markers.add">Add</span></button>
+    <button id="mk-share" data-i18n="markers.share" data-i18n-title="markers.shareTitle" title="Copy a link with all markers baked in — the recipient doesn't need a file">Link</button>
+    <button id="mk-import" data-i18n="markers.import">Import</button>
+    <button id="mk-export" data-i18n="markers.export">Export</button>
+    <input type="file" id="mk-import-input" accept="application/json,.json" style="display:none">
+  </div>
+</div>
+
+<!-- ===== onboarding: a short first-visit tour, see ONBOARDING_STEPS in app.js ===== -->
+<div id="onboarding-overlay" class="onboarding-overlay hidden" aria-hidden="true">
+  <span class="onboarding-wave"></span>
+  <span class="onboarding-wave w2"></span>
+</div>
+<div id="onboarding-callout" class="onboarding-callout frost-dark hidden" role="status">
+  <button id="onboarding-skip" class="onboarding-skip" type="button" data-i18n-title="onboarding.skip" title="Skip" aria-label="Skip">✕</button>
+  <div id="onboarding-step" class="onboarding-step"></div>
+  <div id="onboarding-text" class="onboarding-text"></div>
+  <span id="onboarding-arrow" class="onboarding-arrow arrow-right"></span>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
