@@ -10,7 +10,7 @@ window.PZMAP_CONFIG = {
   // Prefix for the "own" render's DZI tiles (render/gen/html/map_data/base/).
   // null = resolve locally under `base` above; in production this points at
   // the bucket/CDN serving the tiles, e.g. "https://tiles.pzmap.net/base/".
-  tileBase: 'https://pub-1304bd2c744449c29782ab422cba3d40.r2.dev/base/',
+  tileBase: 'https://tiles.pzmap.net/base/',
 
   // The legacy third-party collage basemap isn't distributed with this
   // public repo/release. Leave false unless you also have your own
